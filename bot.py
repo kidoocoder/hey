@@ -6,7 +6,7 @@ import logging
 # Telegram API credentials (replace with your own)
 api_id = "16457832"  # Your API ID
 api_hash = "3030874d0befdb5d05597deacc3e83ab"  # Your API Hash
-bot_token = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Your Bot Token from BotFather
+bot_token = "7169013424:AAGQ_khyW-4hcOiPqIYoSkau_ZtYmC2vTq0"  # Your Bot Token from BotFather
 
 # Load Hugging Face model
 model_name = "microsoft/DialoGPT-medium"

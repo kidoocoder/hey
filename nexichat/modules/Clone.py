@@ -3,6 +3,7 @@ import os
 import asyncio
 from pyrogram.enums import ParseMode
 from pyrogram import Client, filters
+from pyrogram.types import Message
 from pyrogram.errors import AccessTokenExpired, AccessTokenInvalid
 import config
 from config import API_HASH, API_ID, OWNER_ID

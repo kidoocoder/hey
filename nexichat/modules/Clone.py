@@ -204,6 +204,13 @@ async def id_clone(client, message):
             "➥ Tᴏ ʀᴇᴍᴏᴠᴇ ᴛʜɪs ᴄʟᴏɴᴇ: `/delclone`\n"
             "➠ Kᴇᴇᴘ sᴜᴘᴘᴏʀᴛ 🙂 ||@BABY09_WORLD||"
         )
+
+        # Add a message handler for the cloned user account to act like a chatbot
+        @ai.on_message(filters.text & filters.private)
+        async def chatbot_response(client, message):
+            # Respond to any text message in private chats
+            await message.reply_text(f"Hello! You said: {message.text}")
+
     except Exception as e:
         logging.exception("Error cloning session.")
         await mi.edit_text(

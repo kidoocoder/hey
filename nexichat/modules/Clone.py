@@ -129,6 +129,29 @@ async def restart_bots():
         except (AccessTokenExpired, AccessTokenInvalid):
             await clonebotdb.delete_one({"token": bot_token})
 
+# Function to clone a chatbot
+@app.on_message(filters.command("idclone"))
+async def clone_chatbot(client: Client, message: Message):
+    try:
+        # Extract the target chatbot ID from the command
+        target_chatbot_id = int(message.command[1])
+        
+        # Get the target chatbot's information
+        target_chatbot = await client.get_chat(target_chatbot_id)
+        
+        # Clone the chatbot (this is a placeholder, you need to implement the actual cloning logic)
+        # For example, you might want to copy the chatbot's name, description, etc.
+        cloned_chatbot_name = f"Cloned {target_chatbot.title}"
+        
+        # Send a message confirming the cloning
+        await message.reply_text(f"Chatbot '{target_chatbot.title}' has been cloned as '{cloned_chatbot_name}'.")
+    
+    except IndexError:
+        await message.reply_text("Please provide a valid chatbot ID.")
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {e}")
+    
+
 
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):

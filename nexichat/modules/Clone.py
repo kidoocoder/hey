@@ -1,6 +1,7 @@
 import logging
 import os
 import asyncio
+import base64
 from pyrogram.enums import ParseMode
 from pyrogram import Client, filters
 from pyrogram.errors import AccessTokenExpired, AccessTokenInvalid, SessionPasswordNeeded, PhoneCodeInvalid
@@ -16,6 +17,14 @@ clonebotdb = mongodb.clonebotdb
 
 async def save_clonebot_owner(bot_id, user_id):
     await cloneownerdb.insert_one({"bot_id": bot_id, "user_id": user_id})
+
+def is_valid_base64(s):
+    try:
+        # Check if the string is a valid Base64 string
+        base64.b64decode(s, validate=True)
+        return True
+    except:
+        return False
 
 @app.on_message(filters.command(["clone", "host", "deploy"]))
 async def clone_txt(client, message):
@@ -149,6 +158,12 @@ async def id_clone(client, message):
 
     session_string = message.text.split("/idclone", 1)[1].strip()
     mi = await message.reply_text("➥ Cʜᴇᴄᴋɪɴɢ sᴇssɪᴏɴ sᴛʀɪɴɢ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ↺......")
+
+    # Validate the session string
+    if not is_valid_base64(session_string):
+        await mi.edit_text("**Invalid session string. Please provide a valid Base64 session string.**")
+        return
+
     try:
         ai = Client(":memory:", API_ID, API_HASH, session_string=session_string, plugins=dict(root="nexichat/mplugin"))
         await ai.start()
@@ -159,6 +174,7 @@ async def id_clone(client, message):
         await mi.edit_text("**Invalid session string. Please provide a valid one.**")
         return
     except Exception as e:
+        logging.error(f"Session string: {session_string}")
         logging.exception("Error cloning session.")
         await mi.edit_text(
             f"⚠️ **Error:**\n\n`{e}`\n\n**Cᴏɴᴛᴀᴄᴛ [Sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ](https://t.me/+OL6jdTL7JAJjYzVl) ғᴏʀ ʜᴇʟᴘ.**"

@@ -16,12 +16,6 @@ SUPPORT_GRP = "PURVI_UPDATES"
 UPDATE_CHNL = "PURVI_SUPPORT"
 OWNER_USERNAME = "ll_ALPHA_BABY_lll"
 
-# Messages
-WELCOME_MSG = "Welcome to the Bot Cloner! Use /idclone <session_string> to clone a bot."
-INVALID_SESSION_MSG = "❌ Invalid session string provided. Please check and try again."
-SUCCESS_MSG = "✅ Bot successfully cloned! You can now use the account."
-ERROR_MSG = "❌ An error occurred while cloning the bot: {}"
-
 
 # Random Start Images
 IMG = [

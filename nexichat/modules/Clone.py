@@ -131,7 +131,7 @@ async def restart_bots():
             await clonebotdb.delete_one({"token": bot_token})
 
 # Function to clone a chatbot
-@app.on_message(filters.command("idclone"))
+"""@app.on_message(filters.command("idclone"))
 async def clone_chatbot(client: Client, message: Message):
     try:
         # Extract the target chatbot ID from the command
@@ -150,7 +150,7 @@ async def clone_chatbot(client: Client, message: Message):
     except IndexError:
         await message.reply_text("Please provide a valid chatbot ID.")
     except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
+        await message.reply_text(f"An error occurred: {e}")""""
     
 
 

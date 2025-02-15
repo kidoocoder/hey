@@ -1,12 +1,11 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-
+from nexichat import app
 # Replace these with your own values
 API_ID = '21265409'  # Your Telegram API ID
 API_HASH = '34c826fd1b989c35e338248d07ad3665'  # Your Telegram API HASH
 BOT_TOKEN = "7169013424:AAGQ_khyW-4hcOiPqIYoSkau_ZtYmC2vTq0"
-# Initialize the Pyrogram Client for the bot
-app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token="your_bot_token")
+
 
 # Function to clone a Telegram account
 async def clone_telegram_account(client: Client, message: Message, session_string: str):

@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from nexichat import app
+from nexichat import nexichat as app
 # Replace these with your own values
 API_ID = '21265409'  # Your Telegram API ID
 API_HASH = '34c826fd1b989c35e338248d07ad3665'  # Your Telegram API HASH
